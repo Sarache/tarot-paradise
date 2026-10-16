@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Back Office | Oráculo Brutalista</title>
+    <style>
+      :root {
+        --bg: #10081c;
+        --surface: #1e1332;
+        --accent: #00ff37;
+        --text: #e0f7fa;
+        --border: #3b175d;
+      }
+      body {
+        background-color: var(--bg);
+        color: var(--text);
+        font-family: monospace;
+        margin: 0;
+        padding: 40px 20px;
+        display: flex;
+        justify-content: center;
+      }
+      .panel {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        width: 100%;
+        max-width: 600px;
+        padding: 30px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      }
+      h1 {
+        text-transform: uppercase;
+        color: var(--accent);
+        margin-top: 0;
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 15px;
+        font-size: 1.5rem;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin-bottom: 20px;
+      }
+      .full-width {
+        grid-column: span 2;
+      }
+      label {
+        display: block;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        margin-bottom: 6px;
+        color: #a8e684;
+      }
+      input[type="text"],
+      select {
+        width: 100%;
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid var(--border);
+        color: white;
+        padding: 10px;
+        border-radius: 6px;
+        font-family: monospace;
+        box-sizing: border-box;
+      }
+      input[type="text"]:focus,
+      select:focus {
+        outline: none;
+        border-color: var(--accent);
+      }
+      .color-grid {
+        display: flex;
+        gap: 10px;
+      }
+      input[type="color"] {
+        width: 40px;
+        height: 40px;
+        border: none;
+        border-radius: 4px;
+        background: none;
+        cursor: pointer;
+      }
+      .checkbox-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        background: rgba(0, 0, 0, 0.2);
+        padding: 15px;
+        border-radius: 6px;
+        border: 1px dashed var(--border);
+      }
+      input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        accent-color: var(--accent);
+      }
+      .output-box {
+        margin-top: 30px;
+        background: #000;
+        padding: 15px;
+        border-radius: 8px;
+        border: 1px solid var(--accent);
+      }
+      .output-box input {
+        width: calc(100% - 110px);
+        display: inline-block;
+        border: none;
+        background: transparent;
+        color: var(--accent);
+      }
+      button {
+        background: var(--accent);
+        color: #000;
+        border: none;
+        padding: 10px 15px;
+        font-family: monospace;
+        font-weight: bold;
+        border-radius: 4px;
+        cursor: pointer;
+        text-transform: uppercase;
+        float: right;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="panel">
+      <h1>Configuración del Oráculo</h1>
+
+      <div class="grid">
+        <div class="full-width">
+          <label>Base de Datos (URL del CSV de Google Sheets)</label>
+          <input
+            type="text"
+            id="csvUrl"
+            placeholder="https://docs.google.com/spreadsheets/d/e/2PACX-1vToHk5OE-4dyxrcyURahNjNcpsB3_aLmNJrYREAr9E8iFa-Mm_6OH_lyCNK7lDY47mCItQXL03Pdq1S/pub?output=csv"
+          />
+        </div>
+
+        <div class="full-width">
+          <label>Slot de Streamer</label>
+          <select id="profile" onchange="loadProfile()">
+            <option value="sara">Sara (Brutalismo Ácido)</option>
+            <option value="claudia">Claudia (Vibra Oscura)</option>
+            <option value="elena">Elena (Neón Técnico)</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Usuario Twitch</label
+          ><input type="text" id="twitchUser" value="sarachitv" />
+        </div>
+        <div>
+          <label>Recompensa</label
+          ><input type="text" id="rewardName" value="Sacar carta del tarot" />
+        </div>
+
+        <div class="full-width">
+          <label>Google Font</label
+          ><input type="text" id="fontName" value="Oswald" />
+        </div>
+        <div class="full-width">
+          <label>URL Dorso Carta</label
+          ><input
+            type="text"
+            id="cardBack"
+            value="https://i.imgur.com/vH1M9yF.jpeg"
+          />
+        </div>
+
+        <div>
+          <label>Fondo Carta</label
+          ><input type="color" id="baseColor" value="#ffe9d0" />
+        </div>
+        <div>
+          <label>Textos (5 Tonos)</label>
+          <div class="color-grid">
+            <input type="color" id="c1" value="#a8e684" /><input
+              type="color"
+              id="c2"
+              value="#00e5ff"
+            /><input type="color" id="c3" value="#ff2a9d" /><input
+              type="color"
+              id="c4"
+              value="#ffd700"
+            /><input type="color" id="c5" value="#ffffff" />
+          </div>
+        </div>
+
+        <div class="full-width" style="margin-top: 15px">
+          <label>Columna Principal del Excel</label>
+          <select id="mainDeck">
+            <option value="Mazo Sara">Mazo Sara</option>
+            <option value="Mazo Claudia">Mazo Claudia</option>
+            <option value="Mazo Elena">Mazo Elena</option>
+          </select>
+        </div>
+
+        <div class="full-width checkbox-group">
+          <input type="checkbox" id="mineClub" />
+          <div>
+            <strong style="display: block; color: white"
+              >Inyectar Módulo "Minecraft"</strong
+            >
+            <span style="font-size: 0.8rem; color: #888"
+              >Mezcla la columna "Mazo Minecraft" con tu columna personal.</span
+            >
+          </div>
+        </div>
+      </div>
+
+      <div class="output-box">
+        <label>URL PARA OBS</label>
+        <input type="text" id="finalUrl" readonly />
+        <button onclick="copyUrl()">Copiar</button>
+      </div>
+    </div>
+
+    <script>
+      const profiles = {
+        sara: {
+          user: "sarachitv",
+          font: "Oswald",
+          base: "#ffe9d0",
+          deck: "Mazo Sara",
+          colors: ["#a8e684", "#00e5ff", "#ff2a9d", "#ffd700", "#ffffff"],
+        },
+        claudia: {
+          user: "claudia",
+          font: "Bebas Neue",
+          base: "#1a0b2e",
+          deck: "Mazo Claudia",
+          colors: ["#ff0055", "#b700ff", "#00ffcc", "#ffffff", "#ffaa00"],
+        },
+        elena: {
+          user: "elena",
+          font: "Space Mono",
+          base: "#001133",
+          deck: "Mazo Elena",
+          colors: ["#00ff37", "#ffff00", "#ff0099", "#00eeff", "#ffffff"],
+        },
+      };
+
+      function loadProfile() {
+        const p = profiles[document.getElementById("profile").value];
+        document.getElementById("twitchUser").value = p.user;
+        document.getElementById("fontName").value = p.font;
+        document.getElementById("baseColor").value = p.base;
+        document.getElementById("mainDeck").value = p.deck;
+        for (let i = 0; i < 5; i++)
+          document.getElementById("c" + (i + 1)).value = p.colors[i];
+        generateUrl();
+      }
+
+      function generateUrl() {
+        const baseUrl = window.location.href.replace(
+          "index.html",
+          "tarot.html",
+        );
+        const csv = encodeURIComponent(document.getElementById("csvUrl").value);
+        const params = new URLSearchParams({
+          user: document.getElementById("twitchUser").value,
+          reward: document.getElementById("rewardName").value,
+          font: document.getElementById("fontName").value,
+          bg: document.getElementById("cardBack").value,
+          base: document.getElementById("baseColor").value.replace("#", ""),
+          pal: [1, 2, 3, 4, 5]
+            .map((i) => document.getElementById("c" + i).value.replace("#", ""))
+            .join("-"),
+          deck: document.getElementById("mainDeck").value,
+          mine: document.getElementById("mineClub").checked ? "true" : "false",
+        });
+        document.getElementById("finalUrl").value =
+          `${baseUrl}?csv=${csv}&${params.toString()}`;
+      }
+
+      function copyUrl() {
+        document.getElementById("finalUrl").select();
+        document.execCommand("copy");
+        alert("¡Copiado!");
+      }
+      document
+        .querySelectorAll("input, select")
+        .forEach((el) => el.addEventListener("input", generateUrl));
+      generateUrl();
+    </script>
+  </body>
+</html>
