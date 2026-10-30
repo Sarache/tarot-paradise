@@ -1,114 +1,100 @@
-// VARIABLES DE ESTADO
-let masterDeck = []; // El mazo original de la sesión
-let currentDeck = []; // El mazo que se va gastando al sacar cartas
+// ==========================================
+// VARIABLES GLOBALES Y ESTADO
+// ==========================================
+let mazoGlobal = []; // Contiene todas las cartas cargadas desde los CSVs
+let mazoActual = []; // El mazo que se va gastando en directo
 
-// ELEMENTOS DEL DOM
-const viewStream = document.getElementById("view-stream");
-const viewBO = document.getElementById("view-bo");
+// Parámetros de la URL (colores, fuente, usuario, etc.)
+const params = new URLSearchParams(window.location.search);
+const twitchUser = params.get("user") || "sarachitv";
+const rewardName = params.get("reward") || "Sacar carta del tarot";
+const paletaParam = params.get("pal") || "a8e684-00e5ff-ff2a9d-ffd700-ffffff";
+const paleta = paletaParam.split("-").map((c) => "#" + c);
+const useMineClub = params.get("mine") === "true"; // Controla si se mezclan castigos extra
 
-// RUTEO BÁSICO: ¿Estamos en /bo?
-const isBackOffice = window.location.hash === "#bo";
-
-if (isBackOffice) {
-  viewBO.classList.remove("hidden");
-  initBackOffice();
-} else {
-  viewStream.classList.remove("hidden");
-  initStreamWidget();
-}
+// Elementos del DOM
+const cardElement = document.getElementById("card");
+const textElement = document.getElementById("card-text");
+const shuffleVideo = document.getElementById("shuffle-animation");
+const tensionCounter = document.getElementById("tension-counter");
 
 // ==========================================
-// LÓGICA DEL BACK OFFICE
+// CARGA DE BASE DE DATOS LOCALES (GITHUB)
 // ==========================================
-function initBackOffice() {
-  loadFromStorage();
-  renderBoList();
+// Ajusta los nombres exactos a los que tienes en tu carpeta /data/
+const csvFiles = [
+  "data/comun.csv",
+  "data/eskissmee.csv",
+  "data/klauwasaki.csv",
+  "data/sarachi.csv",
+];
 
-  const input = document.getElementById("new-card-input");
+async function loadTarotData() {
+  try {
+    const responses = await Promise.all(csvFiles.map((file) => fetch(file)));
+    const texts = await Promise.all(responses.map((res) => res.text()));
 
-  document.getElementById("btn-add-card").addEventListener("click", () => {
-    if (input.value.trim() !== "") {
-      masterDeck.push(input.value.trim());
-      input.value = "";
-      renderBoList();
-    }
-  });
+    let allCards = [];
 
-  document.getElementById("btn-save-deck").addEventListener("click", () => {
-    localStorage.setItem("tarot_master_deck", JSON.stringify(masterDeck));
-    document.getElementById("save-status").innerText =
-      "¡Guardado y enviado a OBS!";
-    setTimeout(
-      () => (document.getElementById("save-status").innerText = ""),
-      2000,
-    );
-  });
+    texts.forEach((csvText) => {
+      const parsed = Papa.parse(csvText, {
+        header: true,
+        skipEmptyLines: true,
+      });
+      // Extraemos solo la columna "Castigo" de cada archivo (ajusta esto si tu cabecera es otra)
+      parsed.data.forEach((row) => {
+        if (row.Castigo && row.Castigo.trim() !== "") {
+          allCards.push(row.Castigo.trim());
+        }
+      });
+    });
 
-  document.getElementById("btn-clear-all").addEventListener("click", () => {
-    masterDeck = [];
-    renderBoList();
-  });
+    console.log("Mazo cargado con éxito:", allCards);
+    return allCards;
+  } catch (error) {
+    console.error("Error al cargar los CSVs:", error);
+    document.getElementById("loading").innerText =
+      "Error cargando los CSV locales.";
+  }
 }
 
-function renderBoList() {
-  const list = document.getElementById("card-list");
-  list.innerHTML = "";
-  masterDeck.forEach((cardText, index) => {
-    const li = document.createElement("li");
-    li.innerText = cardText;
-
-    const deleteBtn = document.createElement("button");
-    deleteBtn.innerText = "X";
-    deleteBtn.onclick = () => {
-      masterDeck.splice(index, 1);
-      renderBoList();
-    };
-    li.appendChild(deleteBtn);
-    list.appendChild(li);
-  });
-}
+// Inicialización
+loadTarotData().then((mazo) => {
+  if (mazo && mazo.length > 0) {
+    mazoGlobal = mazo;
+    document.getElementById("loading").style.display = "none";
+    resetDeck();
+  } else {
+    document.getElementById("loading").innerText =
+      "Mazo vacío o error de formato.";
+  }
+});
 
 // ==========================================
-// LÓGICA DEL WIDGET (STREAM/OBS)
+// LÓGICA DEL JUEGO
 // ==========================================
-function initStreamWidget() {
-  loadFromStorage();
-  resetDeck();
-
-  document.getElementById("btn-draw").addEventListener("click", drawCard);
-  document.getElementById("btn-reset").addEventListener("click", resetDeck);
-
-  // ESCUCHADOR MÁGICO: Si cambias algo en el #bo, OBS se entera aquí
-  window.addEventListener("storage", (e) => {
-    if (e.key === "tarot_master_deck") {
-      loadFromStorage();
-      resetDeck();
-    }
-  });
-}
-
-function loadFromStorage() {
-  const saved = localStorage.getItem("tarot_master_deck");
-  if (saved) masterDeck = JSON.parse(saved);
+function updateCounter() {
+  tensionCounter.innerText = `[${mazoActual.length}/${mazoGlobal.length}]`;
+  tensionCounter.style.color =
+    mazoActual.length <= 1 ? "#ff0048" : "var(--accent)";
 }
 
 function resetDeck() {
-  // Clonamos el mazo original para poder ir borrando cartas sin perderlas
-  currentDeck = [...masterDeck];
-  updateWidgetUI("El destino espera...", currentDeck.length);
+  mazoActual = [...mazoGlobal];
+  cardElement.classList.remove("is-flipped");
+  updateCounter();
 }
 
 function drawCard() {
-  if (currentDeck.length === 0) {
-    updateWidgetUI("El mazo está vacío. Toca resetear.", 0);
+  if (mazoActual.length === 0) {
+    renderizarTextoBrutalista("MAZO VACÍO");
+    cardElement.classList.add("is-flipped");
     return;
   }
 
-  // Algoritmo simple para barajar/elegir carta aleatoria
-  const randomIndex = Math.floor(Math.random() * currentDeck.length);
-  const drawnCard = currentDeck.splice(randomIndex, 1)[0]; // Saca la carta del mazo
-
-  updateWidgetUI(drawnCard, currentDeck.length);
+  cardElement.style.opacity = "0";
+  shuffleVideo.style.display = "block";
+  shuffleVideo.play();
 
   setTimeout(() => {
     shuffleVideo.style.display = "none";
@@ -118,59 +104,71 @@ function drawCard() {
     const indiceAleatorio = Math.floor(Math.random() * mazoActual.length);
     const cartaElegida = mazoActual.splice(indiceAleatorio, 1)[0];
 
-    // Llamamos a la nueva función mágica en lugar del innerText normal
     renderizarTextoBrutalista(cartaElegida);
-
     cardElement.classList.add("is-flipped");
+    updateCounter();
   }, 2000);
 }
 
-function updateWidgetUI(text, count) {
-  document.getElementById("card-text").innerText = text;
-  document.getElementById("deck-count").innerText = count;
-}
-
-// ... (código anterior de drawCard) ...
-
-/* =======================================================
-   FUNCIÓN DE RENDERIZADO BRUTALISTA Y MÁGICO
-   ======================================================= */
+// ==========================================
+// RENDERIZADO BRUTALISTA
+// ==========================================
 function renderizarTextoBrutalista(texto) {
-  const contenedor = document.getElementById("card-text");
-  contenedor.innerHTML = "";
-  contenedor.className = "brutalist-container";
+  textElement.innerHTML = "";
+  textElement.className = "brutalist-container";
+  textElement.style.setProperty("--escala-dinamica", "1");
+  const rotacionBloque = (Math.random() * 4 - 2).toFixed(1);
+  textElement.style.setProperty("--rotacion-bloque", `${rotacionBloque}deg`);
 
-  // Convertimos a mayúsculas para un bloque más sólido y separamos palabras
-  const palabras = texto.toUpperCase().split(" ");
-  let retrasoLetra = 0;
+  const palabrasRaw = texto.toUpperCase().split(" ");
+  const lineas = [];
+  let lineaActual = "";
 
-  palabras.forEach((palabra) => {
-    const spanPalabra = document.createElement("span");
-    spanPalabra.className = "brutalist-word";
+  for (let i = 0; i < palabrasRaw.length; i++) {
+    const palabra = palabrasRaw[i];
+    if (lineaActual === "") {
+      lineaActual = palabra;
+    } else {
+      if (lineaActual.length + palabra.length + 1 <= 9) {
+        lineaActual += " " + palabra;
+      } else {
+        lineas.push(lineaActual);
+        lineaActual = palabra;
+      }
+    }
+  }
+  if (lineaActual !== "") lineas.push(lineaActual);
 
-    // Magia brutalista: Cada palabra altera su tamaño aleatoriamente
-    // base 2.5em + un aleatorio hasta 1.5em extra
-    const escalaAleatoria = (Math.random() * 1.5 + 2.5).toFixed(2);
-    spanPalabra.style.fontSize = `${escalaAleatoria}em`;
+  const colorRandom = paleta[Math.floor(Math.random() * paleta.length)];
+  textElement.style.color = colorRandom;
 
-    // Separamos cada letra para la animación
-    [...palabra].forEach((letra) => {
-      const spanLetra = document.createElement("span");
-      spanLetra.innerText = letra;
-      spanLetra.className = "magic-letter";
-      // Staggering: cada letra tarda 40ms más que la anterior en salir
-      spanLetra.style.animationDelay = `${retrasoLetra * 0.04}s`;
+  lineas.forEach((linea, index) => {
+    const spanLinea = document.createElement("span");
+    spanLinea.innerText = linea;
+    spanLinea.className = "brutalist-word";
+    const factorAncho = 400;
+    const tamanoFuente = factorAncho / Math.max(linea.length, 3);
+    spanLinea.style.fontSize = `${tamanoFuente}px`;
+    spanLinea.style.animationDelay = `${index * 0.1}s`;
+    textElement.appendChild(spanLinea);
+  });
 
-      spanPalabra.appendChild(spanLetra);
-      retrasoLetra++;
-    });
-
-    contenedor.appendChild(spanPalabra);
-
-    // Añadimos un espacio invisible para que flexbox pueda separar las palabras
-    const espacio = document.createElement("span");
-    espacio.innerHTML = "&nbsp;";
-    espacio.style.fontSize = `${escalaAleatoria}em`;
-    contenedor.appendChild(espacio);
+  requestAnimationFrame(() => {
+    const altoCarta = 480;
+    const altoTexto = textElement.scrollHeight;
+    let escala = (altoCarta / altoTexto) * 0.95;
+    if (escala > 1.4) escala = 1.4;
+    textElement.style.setProperty("--escala-dinamica", escala);
   });
 }
+
+// ==========================================
+// INTEGRACIÓN CON TWITCH
+// ==========================================
+ComfyJS.onChat = (user, message, flags, self, extra) => {
+  if (extra.customRewardId) drawCard();
+};
+ComfyJS.onReward = (user, reward, cost, message, extra) => {
+  if (reward === rewardName) drawCard();
+};
+ComfyJS.Init(twitchUser);
