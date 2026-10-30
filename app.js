@@ -1,174 +1,205 @@
-// ==========================================
-// VARIABLES GLOBALES Y ESTADO
-// ==========================================
-let mazoGlobal = []; // Contiene todas las cartas cargadas desde los CSVs
-let mazoActual = []; // El mazo que se va gastando en directo
-
-// Parámetros de la URL (colores, fuente, usuario, etc.)
-const params = new URLSearchParams(window.location.search);
-const twitchUser = params.get("user") || "sarachitv";
-const rewardName = params.get("reward") || "Sacar carta del tarot";
-const paletaParam = params.get("pal") || "a8e684-00e5ff-ff2a9d-ffd700-ffffff";
-const paleta = paletaParam.split("-").map((c) => "#" + c);
-const useMineClub = params.get("mine") === "true"; // Controla si se mezclan castigos extra
-
-// Elementos del DOM
-const cardElement = document.getElementById("card");
-const textElement = document.getElementById("card-text");
-const shuffleVideo = document.getElementById("shuffle-animation");
-const tensionCounter = document.getElementById("tension-counter");
-
-// ==========================================
-// CARGA DE BASE DE DATOS LOCALES (GITHUB)
-// ==========================================
-// Ajusta los nombres exactos a los que tienes en tu carpeta /data/
-const csvFiles = [
-  "data/comun.csv",
-  "data/eskissmee.csv",
-  "data/klauwasaki.csv",
-  "data/sarachi.csv",
-];
-
-async function loadTarotData() {
-  try {
-    const responses = await Promise.all(csvFiles.map((file) => fetch(file)));
-    const texts = await Promise.all(responses.map((res) => res.text()));
-
-    let allCards = [];
-
-    texts.forEach((csvText) => {
-      const parsed = Papa.parse(csvText, {
-        header: true,
-        skipEmptyLines: true,
-      });
-      // Extraemos solo la columna "Castigo" de cada archivo (ajusta esto si tu cabecera es otra)
-      parsed.data.forEach((row) => {
-        if (row.Castigo && row.Castigo.trim() !== "") {
-          allCards.push(row.Castigo.trim());
-        }
-      });
-    });
-
-    console.log("Mazo cargado con éxito:", allCards);
-    return allCards;
-  } catch (error) {
-    console.error("Error al cargar los CSVs:", error);
-    document.getElementById("loading").innerText =
-      "Error cargando los CSV locales.";
-  }
-}
-
-// Inicialización
-loadTarotData().then((mazo) => {
-  if (mazo && mazo.length > 0) {
-    mazoGlobal = mazo;
-    document.getElementById("loading").style.display = "none";
-    resetDeck();
-  } else {
-    document.getElementById("loading").innerText =
-      "Mazo vacío o error de formato.";
-  }
-});
-
-// ==========================================
-// LÓGICA DEL JUEGO
-// ==========================================
-function updateCounter() {
-  tensionCounter.innerText = `[${mazoActual.length}/${mazoGlobal.length}]`;
-  tensionCounter.style.color =
-    mazoActual.length <= 1 ? "#ff0048" : "var(--accent)";
-}
-
-function resetDeck() {
-  mazoActual = [...mazoGlobal];
-  cardElement.classList.remove("is-flipped");
-  updateCounter();
-}
-
-function drawCard() {
-  if (mazoActual.length === 0) {
-    renderizarTextoBrutalista("MAZO VACÍO");
-    cardElement.classList.add("is-flipped");
-    return;
-  }
-
-  cardElement.style.opacity = "0";
-  shuffleVideo.style.display = "block";
-  shuffleVideo.play();
-
-  setTimeout(() => {
-    shuffleVideo.style.display = "none";
-    shuffleVideo.currentTime = 0;
-    cardElement.style.opacity = "1";
-
-    const indiceAleatorio = Math.floor(Math.random() * mazoActual.length);
-    const cartaElegida = mazoActual.splice(indiceAleatorio, 1)[0];
-
-    renderizarTextoBrutalista(cartaElegida);
-    cardElement.classList.add("is-flipped");
-    updateCounter();
-  }, 2000);
-}
-
-// ==========================================
-// RENDERIZADO BRUTALISTA
-// ==========================================
-function renderizarTextoBrutalista(texto) {
-  textElement.innerHTML = "";
-  textElement.className = "brutalist-container";
-  textElement.style.setProperty("--escala-dinamica", "1");
-  const rotacionBloque = (Math.random() * 4 - 2).toFixed(1);
-  textElement.style.setProperty("--rotacion-bloque", `${rotacionBloque}deg`);
-
-  const palabrasRaw = texto.toUpperCase().split(" ");
-  const lineas = [];
-  let lineaActual = "";
-
-  for (let i = 0; i < palabrasRaw.length; i++) {
-    const palabra = palabrasRaw[i];
-    if (lineaActual === "") {
-      lineaActual = palabra;
-    } else {
-      if (lineaActual.length + palabra.length + 1 <= 9) {
-        lineaActual += " " + palabra;
-      } else {
-        lineas.push(lineaActual);
-        lineaActual = palabra;
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Widget Tarot Dinámico</title>
+    <!-- Librerías Externas -->
+    <script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    
+    <style>
+      /* --- Estilos base (el resto sigue igual) --- */
+      :root {
+        --bg-dark: transparent;
+        --dinamic-font: sans-serif;
+        --base-color: #ffe9d0;
+        --accent: #00ff37;
       }
-    }
-  }
-  if (lineaActual !== "") lineas.push(lineaActual);
+      body {
+        background-color: var(--bg-dark) !important;
+        font-family: monospace;
+        margin: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        overflow: hidden;
+        color: white;
+      }
+      .widget-container {
+        position: relative;
+        width: 400px;
+        height: 600px;
+        perspective: 1000px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+      #tension-counter {
+        position: absolute;
+        top: 10px;
+        right: 20px;
+        font-size: 24px;
+        font-weight: bold;
+        color: var(--accent);
+        text-shadow: 0 0 10px var(--accent);
+        z-index: 20;
+        font-family: var(--dinamic-font);
+        opacity: 0.8;
+      }
+      .tarot-card {
+        width: 320px;
+        height: 480px;
+        position: relative;
+        transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        transform-style: preserve-3d;
+        cursor: pointer;
+        margin-bottom: 20px;
+      }
+      .tarot-card.is-flipped {
+        transform: rotateY(180deg);
+      }
+      .card-face {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        backface-visibility: hidden;
+        border-radius: 16px;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        border: 2px solid var(--accent);
+      }
+      .card-front {
+        background-color: #111;
+        background-size: cover;
+        background-position: center;
+      }
+      .card-back {
+        background-color: var(--base-color);
+        transform: rotateY(180deg);
+        overflow: hidden;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      .brutalist-container {
+        --escala-dinamica: 1;
+        --rotacion-bloque: 0deg;
+        font-family: var(--dinamic-font);
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        line-height: 0.72;
+        text-transform: uppercase;
+        mix-blend-mode: exclusion;
+        animation: floatBlock 4s ease-in-out infinite alternate;
+      }
+      @keyframes floatBlock {
+        0% {
+          transform: scale(calc(var(--escala-dinamica) * 0.99))
+            rotate(calc(var(--rotacion-bloque) - 0.5deg));
+        }
+        100% {
+          transform: scale(calc(var(--escala-dinamica) * 1.01))
+            rotate(calc(var(--rotacion-bloque) + 0.5deg));
+        }
+      }
+      .brutalist-word {
+        display: block;
+        white-space: nowrap;
+        transform-origin: center center;
+        opacity: 0;
+        animation: slamWord 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+      }
+      @keyframes slamWord {
+        0% { opacity: 0; transform: scale(1.2); }
+        100% { opacity: 1; transform: scale(1); filter: blur(0); }
+      }
+      #shuffle-animation {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 500px;
+        z-index: 10;
+        display: none;
+        pointer-events: none;
+      }
+      .controls {
+        display: flex;
+        gap: 15px;
+        opacity: 0.1;
+        transition: opacity 0.3s;
+      }
+      .controls:hover {
+        opacity: 1;
+      }
+      button {
+        background: var(--accent);
+        color: #000;
+        border: none;
+        padding: 8px 20px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-weight: bold;
+        text-transform: uppercase;
+      }
+      #loading {
+        position: absolute;
+        z-index: 50;
+        background: rgba(0, 0, 0, 0.8);
+        padding: 20px;
+        border-radius: 8px;
+        font-family: var(--dinamic-font);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="widget-container">
+      <div id="loading">Conectando con el Oráculo...</div>
+      <div id="tension-counter">[0/0]</div>
+      <video id="shuffle-animation" src="./img/manitas.webm" muted playsinline></video>
+      
+      <div id="card" class="tarot-card">
+        <div id="card-front-img" class="card-face card-front"></div>
+        <div class="card-face card-back">
+          <div id="card-text" class="brutalist-container"></div>
+        </div>
+      </div>
+      
+      <div class="controls">
+        <button onclick="drawCard()">Forzar Carta (Test)</button>
+        <button onclick="resetDeck()">Resetear Mazo</button>
+      </div>
+    </div>
 
-  const colorRandom = paleta[Math.floor(Math.random() * paleta.length)];
-  textElement.style.color = colorRandom;
+    <!-- Script para inyectar configuraciones visuales desde la URL antes de cargar app.js -->
+    <script>
+      const localParams = new URLSearchParams(window.location.search);
+      const fontName = localParams.get("font") || "Oswald";
+      const bgImg = localParams.get("bg") || "";
+      const baseColor = "#" + (localParams.get("base") || "ffe9d0");
 
-  lineas.forEach((linea, index) => {
-    const spanLinea = document.createElement("span");
-    spanLinea.innerText = linea;
-    spanLinea.className = "brutalist-word";
-    const factorAncho = 400;
-    const tamanoFuente = factorAncho / Math.max(linea.length, 3);
-    spanLinea.style.fontSize = `${tamanoFuente}px`;
-    spanLinea.style.animationDelay = `${index * 0.1}s`;
-    textElement.appendChild(spanLinea);
-  });
-
-  requestAnimationFrame(() => {
-    const altoCarta = 480;
-    const altoTexto = textElement.scrollHeight;
-    let escala = (altoCarta / altoTexto) * 0.95;
-    if (escala > 1.4) escala = 1.4;
-    textElement.style.setProperty("--escala-dinamica", escala);
-  });
-}
-
-// ==========================================
-// INTEGRACIÓN CON TWITCH
-// ==========================================
-ComfyJS.onChat = (user, message, flags, self, extra) => {
-  if (extra.customRewardId) drawCard();
-};
-ComfyJS.onReward = (user, reward, cost, message, extra) => {
-  if (reward === rewardName) drawCard();
-};
-ComfyJS.Init(twitchUser);
+      const fontLink = document.createElement("link");
+      fontLink.href = `https://fonts.googleapis.com/css2?family=${fontName.replace(/ /g, "+")}&display=swap`;
+      fontLink.rel = "stylesheet";
+      document.head.appendChild(fontLink);
+      
+      document.documentElement.style.setProperty("--dinamic-font", `"${fontName}", sans-serif`);
+      document.documentElement.style.setProperty("--base-color", baseColor);
+      
+      if (bgImg) {
+        document.getElementById("card-front-img").style.backgroundImage = `url('${bgImg}')`;
+      }
+    </script>
+    
+    <!-- Carga del motor principal -->
+    <script src="app.js"></script>
+  </body>
+</html>
