@@ -151,6 +151,15 @@ function drawCard() {
     hPinch.style.transition = "transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)";
   }, 3000);
 
+  // 3.5. El mini-arrastre (Tira de la carta hacia abajo)
+  setTimeout(() => {
+    cardElement.classList.remove("card-press");
+    cardElement.classList.add("card-drag");
+
+    hPinch.style.transform = "scale(0.95) translateY(80px) rotate(-2deg)";
+    hPinch.style.transition = "transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)";
+  }, 3400);
+
   // 4. EL GIRO 3D (La carta y la mano recuperan su tamaño y se voltean)
   setTimeout(() => {
     const indiceAleatorio = Math.floor(Math.random() * mazoActual.length);
