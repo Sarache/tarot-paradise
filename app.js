@@ -158,39 +158,26 @@ function drawCard() {
     hPinch.style.transition = "transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)";
   }, 3400);
 
-  // 4. EL GIRO 3D (La carta y la mano delantera empiezan a voltearse)
+  // 4. EL GIRO 3D (La carta y la mano recuperan su tamaño y se voltean)
   setTimeout(() => {
     const indiceAleatorio = Math.floor(Math.random() * mazoActual.length);
     const cartaElegida = mazoActual.splice(indiceAleatorio, 1)[0];
     renderizarTextoBrutalista(cartaElegida);
 
+    // Al quitar el arrastre, la carta vuelve a su 100% de tamaño
     cardElement.classList.remove("card-drag");
-    cardElement.classList.add("is-flipped"); // La carta tarda 0.8s en girar por CSS
+    cardElement.classList.add("is-flipped");
 
-    // La mano de pinza gira 90 grados al mismo ritmo
+    // CORRECCIÓN: Obligamos a la mano a volver al 100% (scale 1) mientras gira
     hPinch.style.transition = "transform 0.35s ease-in";
-    hPinch.style.transform = "scale(0.95) translateY(80px) rotateY(90deg)";
+    hPinch.style.transform = "scale(1) translateY(80px) rotateY(90deg)";
 
-    // Preparamos la mano trasera "de canto" (invisible)
+    // Preparamos la mano trasera también al 100% de tamaño
     hHold.style.transition = "none";
-    hHold.style.transform = "translateY(0) rotateY(-90deg)";
+    hHold.style.transform = "scale(1) translateY(0) rotateY(-90deg)";
     hHold.style.opacity = "1";
   }, 3900);
-
-  // 5. EL SWAP MÁGICO (Mitad del giro, 350ms después)
-  setTimeout(() => {
-    // Ocultamos la pinza (que ahora mismo está de canto e invisible)
-    hPinch.style.opacity = "0";
-
-    // La mano trasera termina de girar hacia el frente completando la ilusión
-    hHold.style.transition =
-      "transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)";
-    hHold.style.transform = "translateY(0) rotateY(0deg)";
-
-    updateCounter();
-  }, 4250);
 }
-
 // ==========================================
 // RENDERIZADO BRUTALISTA
 // ==========================================
