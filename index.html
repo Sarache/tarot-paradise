@@ -149,7 +149,7 @@
           user: "sarachitv",
           font: "Oswald",
           base: "#ffe9d0",
-          img: "./img/sara_dorso.jpg" /* O el nombre exacto de tu imagen */,
+          img: "./img/sara_dorso.jpg",
           csv: "sarachi.csv",
           colors: ["#a8e684", "#00e5ff", "#ff2a9d", "#ffd700", "#ffffff"],
         },
@@ -165,7 +165,7 @@
           user: "eskissmee",
           font: "file000541",
           base: "#001133",
-          img: "./img/eskiss_dorso.jpg" /* Cambia si es otro */,
+          img: "./img/eskiss_dorso.jpg",
           csv: "eskissmee.csv",
           colors: ["#00ff37", "#ffff00", "#ff0099", "#00eeff", "#ffffff"],
         },
@@ -173,17 +173,17 @@
 
       function loadProfile() {
         const selected = document.getElementById("profile").value;
-        localStorage.setItem("oraculo_profile", selected); // Guarda el perfil en el navegador
+        localStorage.setItem("oraculo_profile", selected);
 
         const p = profiles[selected];
-        document.getElementById("twitchUser").value = p.user;
-        const p = profiles[document.getElementById("profile").value];
         document.getElementById("twitchUser").value = p.user;
         document.getElementById("fontName").value = p.font;
         document.getElementById("baseColor").value = p.base;
         document.getElementById("cardBack").value = p.img;
-        for (let i = 0; i < 5; i++)
+
+        for (let i = 0; i < 5; i++) {
           document.getElementById("c" + (i + 1)).value = p.colors[i];
+        }
         generateUrl();
       }
 
@@ -194,15 +194,15 @@
         else if (!currentPath.endsWith("/")) currentPath += "/tarot.html";
         else currentPath += "tarot.html";
 
-        // Asegúrate de tener estas dos líneas exactas:
         const p = profiles[document.getElementById("profile").value];
+
         const params = new URLSearchParams({
           user: document.getElementById("twitchUser").value,
           reward: document.getElementById("rewardName").value,
           font: document.getElementById("fontName").value,
           bg: document.getElementById("cardBack").value,
           base: document.getElementById("baseColor").value.replace("#", ""),
-          deck: p.csv, // <--- ESTA ES LA MAGIA QUE SEPARA LOS MAZOS
+          deck: p.csv,
           pal: [1, 2, 3, 4, 5]
             .map((i) => document.getElementById("c" + i).value.replace("#", ""))
             .join("-"),
@@ -212,15 +212,33 @@
         document.getElementById("finalUrl").value = url;
         document.getElementById("testLink").href = url;
       }
-      const savedProfile = localStorage.getItem("oraculo_profile");
-      if (savedProfile && profiles[savedProfile]) {
-        document.getElementById("profile").value = savedProfile;
-      }
-      loadProfile(); // Esto carga los datos y genera la URL automáticamente
+
       function copyUrl() {
         document.getElementById("finalUrl").select();
         document.execCommand("copy");
       }
+
+      function abrirEditorGitHub() {
+        const p = profiles[document.getElementById("profile").value];
+        window.open(
+          `https://github.com/sarache/tarot-paradise/edit/main/data/${p.csv}`,
+          "_blank",
+        );
+      }
+
+      // Escuchadores de eventos para que la URL cambie si modificas algo a mano
+      document.querySelectorAll("input, select").forEach((el) => {
+        el.addEventListener("input", generateUrl);
+      });
+
+      // Inicialización con memoria (localStorage)
+      const savedProfile = localStorage.getItem("oraculo_profile");
+      if (savedProfile && profiles[savedProfile]) {
+        document.getElementById("profile").value = savedProfile;
+      }
+
+      // Cargamos el perfil al arrancar la página
+      loadProfile();
 
       document
         .querySelectorAll("input, select")
