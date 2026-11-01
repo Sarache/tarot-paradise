@@ -172,6 +172,11 @@
       };
 
       function loadProfile() {
+        const selected = document.getElementById("profile").value;
+        localStorage.setItem("oraculo_profile", selected); // Guarda el perfil en el navegador
+
+        const p = profiles[selected];
+        document.getElementById("twitchUser").value = p.user;
         const p = profiles[document.getElementById("profile").value];
         document.getElementById("twitchUser").value = p.user;
         document.getElementById("fontName").value = p.font;
