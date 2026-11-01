@@ -18,7 +18,16 @@ const shuffleVideo = document.getElementById("shuffle-animation");
 const tensionCounter = document.getElementById("tension-counter");
 
 // Carga solo el mazo común y la "valla" de la streamer seleccionada
-const csvFiles = ["data/comun.csv", `data/${personalCsv}`];
+const useCommon = urlParams.get("common") !== "false"; // Verdadero por defecto
+
+// Montamos la lista de descargas dinámicamente
+const csvFiles = [];
+if (useCommon) {
+  csvFiles.push("data/comun.csv");
+}
+if (personalCsv) {
+  csvFiles.push(`data/${personalCsv}`);
+}
 
 // ... (Aquí sigue tu función loadTarotData() buscando row.Texto) ...
 // ==========================================
