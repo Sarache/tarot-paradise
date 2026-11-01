@@ -47,37 +47,38 @@
 
       .mystic-hand {
         position: absolute;
-        bottom: -1000px; /* Escondidas debajo de la pantalla */
+        bottom: 0; /* Pegado siempre al suelo del widget */
         left: 50%;
-        margin-left: -200px; /* Centrado exacto (ajusta según el ancho de tu PNG) */
-        width: 400px;
+        margin-left: -240px; /* Centrado para un ancho de 480px */
+        width: 480px; /* Más grande que la carta */
+        transform: translateY(120%);
+        opacity: 0;
         transition:
-          bottom 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275),
-          transform 0.2s;
+          transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+          opacity 0.2s;
         pointer-events: none;
       }
       .layer-back {
         z-index: 10;
-      } /* Detrás de la carta */
+      } /* Por detrás de la carta */
       .tarot-card {
         z-index: 20;
-      } /* La carta está en medio */
+      } /* La carta en medio */
       .layer-front {
         z-index: 30;
-      } /* El pulgar por delante */
-      .layer-flat {
-        z-index: 40;
-      } /* La mano plana por encima de todo al tocar */
+      } /* Por delante de la carta */
 
-      /* Clases de animación controladas por JS */
-      .show-flat {
-        bottom: -80px;
+      /* Clases de control JS */
+      .hand-show {
+        transform: translateY(0);
+        opacity: 1;
       }
-      .tap-flat {
-        transform: scale(0.95) rotate(-2deg);
+      .hand-pull {
+        transform: translateY(120%);
+        transition: transform 0.25s ease-in; /* Tirón rápido hacia abajo */
       }
-      .show-hold {
-        bottom: -100px;
+      .no-transition {
+        transition: none !important;
       }
 
       #tension-counter {

@@ -107,42 +107,50 @@ function drawCard() {
     return;
   }
 
-  // 1. Reseteo inicial de capas
+  const hRelaxed = document.getElementById("hand-relaxed");
+  const hPinch = document.getElementById("hand-pinch");
+  const hHold = document.getElementById("hand-hold");
+
+  // 0. Resetear el estado
   cardElement.classList.remove("is-flipped");
-  document.getElementById("hand-back").classList.remove("show-hold");
-  document.getElementById("hand-front").classList.remove("show-hold");
-  cardElement.style.opacity = "0";
+  hRelaxed.className = "mystic-hand layer-front";
+  hPinch.className = "mystic-hand layer-front no-transition";
+  hHold.className = "mystic-hand layer-back";
+  cardElement.style.opacity = "1";
 
-  const handFlat = document.getElementById("hand-flat");
-
-  // 2. Sube la mano plana
-  handFlat.classList.add("show-flat");
-
-  // 3. Hace el toque mágico
+  // 1. Aparece la mano relajada desde abajo
   setTimeout(() => {
-    handFlat.classList.add("tap-flat");
+    hRelaxed.classList.add("hand-show");
+  }, 100);
+
+  // 2. Cambio súbito a la mano de pinza (sin animación de subida)
+  setTimeout(() => {
+    hRelaxed.classList.remove("hand-show");
+    hPinch.classList.add("hand-show");
+
+    // Devolvemos la transición a la mano de pinza para el siguiente paso
+    setTimeout(() => {
+      hPinch.classList.remove("no-transition");
+    }, 50);
   }, 600);
 
-  // 4. Retira la mano plana y revela la carta
+  // 3. La mano de pinza pega el tirón y la carta se voltea
   setTimeout(() => {
-    handFlat.classList.remove("tap-flat");
-    handFlat.classList.remove("show-flat");
+    // Sorteamos la carta
+    const indiceAleatorio = Math.floor(Math.random() * mazoActual.length);
+    const cartaElegida = mazoActual.splice(indiceAleatorio, 1)[0];
+    renderizarTextoBrutalista(cartaElegida);
 
-    setTimeout(() => {
-      cardElement.style.opacity = "1";
-      const indiceAleatorio = Math.floor(Math.random() * mazoActual.length);
-      const cartaElegida = mazoActual.splice(indiceAleatorio, 1)[0];
-      renderizarTextoBrutalista(cartaElegida);
-      cardElement.classList.add("is-flipped");
-
-      // 5. Las manos de pinza suben para sostener la carta
-      setTimeout(() => {
-        document.getElementById("hand-back").classList.add("show-hold");
-        document.getElementById("hand-front").classList.add("show-hold");
-        updateCounter();
-      }, 400);
-    }, 400);
+    hPinch.classList.remove("hand-show");
+    hPinch.classList.add("hand-pull");
+    cardElement.classList.add("is-flipped");
   }, 900);
+
+  // 4. La mano de soporte aparece por detrás cuando la carta está legible
+  setTimeout(() => {
+    hHold.classList.add("hand-show");
+    updateCounter();
+  }, 1200);
 }
 
 // ==========================================
