@@ -44,6 +44,42 @@
         align-items: center;
         justify-content: center;
       }
+
+      .mystic-hand {
+        position: absolute;
+        bottom: -1000px; /* Escondidas debajo de la pantalla */
+        left: 50%;
+        margin-left: -200px; /* Centrado exacto (ajusta según el ancho de tu PNG) */
+        width: 400px;
+        transition:
+          bottom 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+          transform 0.2s;
+        pointer-events: none;
+      }
+      .layer-back {
+        z-index: 10;
+      } /* Detrás de la carta */
+      .tarot-card {
+        z-index: 20;
+      } /* La carta está en medio */
+      .layer-front {
+        z-index: 30;
+      } /* El pulgar por delante */
+      .layer-flat {
+        z-index: 40;
+      } /* La mano plana por encima de todo al tocar */
+
+      /* Clases de animación controladas por JS */
+      .show-flat {
+        bottom: -80px;
+      }
+      .tap-flat {
+        transform: scale(0.95) rotate(-2deg);
+      }
+      .show-hold {
+        bottom: -100px;
+      }
+
       #tension-counter {
         position: absolute;
         top: 10px;
@@ -180,12 +216,22 @@
     <div class="widget-container">
       <div id="loading">Conectando con el Oráculo...</div>
       <div id="tension-counter">[0/0]</div>
-      <video
-        id="shuffle-animation"
-        src="./img/manitas.webm"
-        muted
-        playsinline
-      ></video>
+      <!-- Capas de las manos mágicas -->
+      <img
+        src="./img/mano-atras.png"
+        id="hand-back"
+        class="mystic-hand layer-back"
+      />
+      <img
+        src="./img/mano-frente.png"
+        id="hand-front"
+        class="mystic-hand layer-front"
+      />
+      <img
+        src="./img/mano-plana.png"
+        id="hand-flat"
+        class="mystic-hand layer-flat"
+      />
 
       <div id="card" class="tarot-card">
         <div id="card-front-img" class="card-face card-front"></div>

@@ -107,22 +107,42 @@ function drawCard() {
     return;
   }
 
+  // 1. Reseteo inicial de capas
+  cardElement.classList.remove("is-flipped");
+  document.getElementById("hand-back").classList.remove("show-hold");
+  document.getElementById("hand-front").classList.remove("show-hold");
   cardElement.style.opacity = "0";
-  shuffleVideo.style.display = "block";
-  shuffleVideo.play();
 
+  const handFlat = document.getElementById("hand-flat");
+
+  // 2. Sube la mano plana
+  handFlat.classList.add("show-flat");
+
+  // 3. Hace el toque mágico
   setTimeout(() => {
-    shuffleVideo.style.display = "none";
-    shuffleVideo.currentTime = 0;
-    cardElement.style.opacity = "1";
+    handFlat.classList.add("tap-flat");
+  }, 600);
 
-    const indiceAleatorio = Math.floor(Math.random() * mazoActual.length);
-    const cartaElegida = mazoActual.splice(indiceAleatorio, 1)[0];
+  // 4. Retira la mano plana y revela la carta
+  setTimeout(() => {
+    handFlat.classList.remove("tap-flat");
+    handFlat.classList.remove("show-flat");
 
-    renderizarTextoBrutalista(cartaElegida);
-    cardElement.classList.add("is-flipped");
-    updateCounter();
-  }, 2000);
+    setTimeout(() => {
+      cardElement.style.opacity = "1";
+      const indiceAleatorio = Math.floor(Math.random() * mazoActual.length);
+      const cartaElegida = mazoActual.splice(indiceAleatorio, 1)[0];
+      renderizarTextoBrutalista(cartaElegida);
+      cardElement.classList.add("is-flipped");
+
+      // 5. Las manos de pinza suben para sostener la carta
+      setTimeout(() => {
+        document.getElementById("hand-back").classList.add("show-hold");
+        document.getElementById("hand-front").classList.add("show-hold");
+        updateCounter();
+      }, 400);
+    }, 400);
+  }, 900);
 }
 
 // ==========================================
