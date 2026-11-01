@@ -2,221 +2,224 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
-    <title>Widget Tarot Dinámico</title>
-    <!-- Librerías Externas -->
-    <script src="https://cdn.jsdelivr.net/npm/comfy.js@latest/dist/comfy.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-
+    <title>Lanzador | Oráculo Brutalista</title>
     <style>
-      /* --- Estilos base (el resto sigue igual) --- */
       :root {
-        --bg-dark: transparent;
-        --dinamic-font: sans-serif;
-        --base-color: #ffe9d0;
+        --bg: #10081c;
+        --surface: #1e1332;
         --accent: #00ff37;
+        --text: #e0f7fa;
+        --border: #3b175d;
       }
       body {
-        background-color: var(--bg-dark) !important;
+        background-color: var(--bg);
+        color: var(--text);
         font-family: monospace;
-        margin: 0;
+        padding: 40px 20px;
         display: flex;
         justify-content: center;
-        align-items: center;
-        height: 100vh;
-        overflow: hidden;
-        color: white;
       }
-      .widget-container {
-        position: relative;
-        width: 400px;
-        height: 600px;
-        perspective: 1000px;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
+      .panel {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        width: 100%;
+        max-width: 600px;
+        padding: 30px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
       }
-      #tension-counter {
-        position: absolute;
-        top: 10px;
-        right: 20px;
-        font-size: 24px;
-        font-weight: bold;
+      h1 {
         color: var(--accent);
-        text-shadow: 0 0 10px var(--accent);
-        z-index: 20;
-        font-family: var(--dinamic-font);
-        opacity: 0.8;
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 15px;
       }
-      .tarot-card {
-        width: 320px;
-        height: 480px;
-        position: relative;
-        transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        transform-style: preserve-3d;
-        cursor: pointer;
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
         margin-bottom: 20px;
       }
-      .tarot-card.is-flipped {
-        transform: rotateY(180deg);
+      .full-width {
+        grid-column: span 2;
       }
-      .card-face {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        backface-visibility: hidden;
-        border-radius: 16px;
-        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        text-align: center;
-        border: 2px solid var(--accent);
-      }
-      .card-front {
-        background-color: #111;
-        background-size: cover;
-        background-position: center;
-      }
-      .card-back {
-        background-color: var(--base-color);
-        transform: rotateY(180deg);
-        overflow: hidden;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-      }
-      .brutalist-container {
-        --escala-dinamica: 1;
-        --rotacion-bloque: 0deg;
-        font-family: var(--dinamic-font);
-        width: 100%;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        line-height: 0.72;
-        text-transform: uppercase;
-        mix-blend-mode: exclusion;
-        animation: floatBlock 4s ease-in-out infinite alternate;
-      }
-      @keyframes floatBlock {
-        0% {
-          transform: scale(calc(var(--escala-dinamica) * 0.99))
-            rotate(calc(var(--rotacion-bloque) - 0.5deg));
-        }
-        100% {
-          transform: scale(calc(var(--escala-dinamica) * 1.01))
-            rotate(calc(var(--rotacion-bloque) + 0.5deg));
-        }
-      }
-      .brutalist-word {
+      label {
         display: block;
-        white-space: nowrap;
-        transform-origin: center center;
-        opacity: 0;
-        animation: slamWord 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)
-          forwards;
+        font-size: 0.85rem;
+        color: #a8e684;
+        margin-bottom: 5px;
       }
-      @keyframes slamWord {
-        0% {
-          opacity: 0;
-          transform: scale(1.2);
-        }
-        100% {
-          opacity: 1;
-          transform: scale(1);
-          filter: blur(0);
-        }
+      input,
+      select {
+        width: 100%;
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid var(--border);
+        color: white;
+        padding: 10px;
+        border-radius: 6px;
+        box-sizing: border-box;
       }
-      #shuffle-animation {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 500px;
-        z-index: 10;
-        display: none;
-        pointer-events: none;
-      }
-      .controls {
+      .color-grid {
         display: flex;
-        gap: 15px;
-        opacity: 0.1;
-        transition: opacity 0.3s;
+        gap: 10px;
       }
-      .controls:hover {
-        opacity: 1;
+      input[type="color"] {
+        width: 40px;
+        height: 40px;
+        padding: 0;
+        border: none;
+      }
+      .output-box {
+        margin-top: 30px;
+        background: #000;
+        padding: 15px;
+        border: 1px solid var(--accent);
+        border-radius: 8px;
+      }
+      .output-box input {
+        width: calc(100% - 110px);
+        display: inline-block;
+        border: none;
+        color: var(--accent);
       }
       button {
         background: var(--accent);
         color: #000;
         border: none;
-        padding: 8px 20px;
-        border-radius: 8px;
-        cursor: pointer;
+        padding: 10px 15px;
         font-weight: bold;
-        text-transform: uppercase;
-      }
-      #loading {
-        position: absolute;
-        z-index: 50;
-        background: rgba(0, 0, 0, 0.8);
-        padding: 20px;
-        border-radius: 8px;
-        font-family: var(--dinamic-font);
+        cursor: pointer;
+        float: right;
+        border-radius: 4px;
       }
     </style>
   </head>
   <body>
-    <div class="widget-container">
-      <div id="loading">Conectando con el Oráculo...</div>
-      <div id="tension-counter">[0/0]</div>
-      <video
-        id="shuffle-animation"
-        src="./img/manitas.webm"
-        muted
-        playsinline
-      ></video>
+    <div class="panel">
+      <h1>Lanzador del Oráculo</h1>
+      <div class="grid">
+        <div class="full-width">
+          <label>Selecciona Streamer</label>
+          <select id="profile" onchange="loadProfile()">
+            <option value="sara">Sara (Brutalismo Ácido)</option>
+            <option value="klau">Klauwasaki (Araknida)</option>
+            <option value="eskissmee">Eskissmee (Neón)</option>
+          </select>
+        </div>
 
-      <div id="card" class="tarot-card">
-        <div id="card-front-img" class="card-face card-front"></div>
-        <div class="card-face card-back">
-          <div id="card-text" class="brutalist-container"></div>
+        <div>
+          <label>Usuario Twitch</label
+          ><input type="text" id="twitchUser" value="sarachitv" />
+        </div>
+        <div>
+          <label>Recompensa Twitch</label
+          ><input type="text" id="rewardName" value="Sacar carta del tarot" />
+        </div>
+
+        <div class="full-width">
+          <label>Fuente (Google Fonts)</label
+          ><input type="text" id="fontName" value="Oswald" />
+        </div>
+        <div class="full-width">
+          <label>Ruta de la Imagen del Dorso (Local o URL)</label>
+          <input type="text" id="cardBack" value="./img/dorso.jpg" />
+        </div>
+
+        <div>
+          <label>Color Base Carta</label
+          ><input type="color" id="baseColor" value="#ffe9d0" />
+        </div>
+        <div>
+          <label>Paleta de Textos (5 Tonos)</label>
+          <div class="color-grid">
+            <input type="color" id="c1" value="#a8e684" />
+            <input type="color" id="c2" value="#00e5ff" />
+            <input type="color" id="c3" value="#ff2a9d" />
+            <input type="color" id="c4" value="#ffd700" />
+            <input type="color" id="c5" value="#ffffff" />
+          </div>
         </div>
       </div>
 
-      <div class="controls">
-        <button onclick="drawCard()">Forzar Carta (Test)</button>
-        <button onclick="resetDeck()">Resetear Mazo</button>
+      <div class="output-box">
+        <label>ENLACE LISTO PARA OBS (O NAVEGADOR)</label>
+        <input type="text" id="finalUrl" readonly />
+        <button onclick="copyUrl()">Copiar</button>
+      </div>
+
+      <div style="margin-top: 20px; text-align: center">
+        <a
+          href="#"
+          id="testLink"
+          target="_blank"
+          style="color: var(--accent); text-decoration: none"
+          >Abrir directamente en el navegador 🚀</a
+        >
       </div>
     </div>
 
-    <!-- Script para inyectar configuraciones visuales desde la URL antes de cargar app.js -->
     <script>
-      const localParams = new URLSearchParams(window.location.search);
-      const fontName = localParams.get("font") || "Oswald";
-      const bgImg = localParams.get("bg") || "";
-      const baseColor = "#" + (localParams.get("base") || "ffe9d0");
+      const profiles = {
+        sara: {
+          user: "sarachitv",
+          font: "Oswald",
+          base: "#ffe9d0",
+          img: "./img/dorso.jpg",
+          colors: ["#a8e684", "#00e5ff", "#ff2a9d", "#ffd700", "#ffffff"],
+        },
+        klau: {
+          user: "klauwasaki",
+          font: "Bebas Neue",
+          base: "#1a0b2e",
+          img: "./img/dorso-klau.jpg",
+          colors: ["#ff0055", "#b700ff", "#00ffcc", "#ffffff", "#ffaa00"],
+        },
+        eskissmee: {
+          user: "eskissmee",
+          font: "Space Mono",
+          base: "#001133",
+          img: "./img/dorso-eski.jpg",
+          colors: ["#00ff37", "#ffff00", "#ff0099", "#00eeff", "#ffffff"],
+        },
+      };
 
-      const fontLink = document.createElement("link");
-      fontLink.href = `https://fonts.googleapis.com/css2?family=${fontName.replace(/ /g, "+")}&display=swap`;
-      fontLink.rel = "stylesheet";
-      document.head.appendChild(fontLink);
-
-      document.documentElement.style.setProperty(
-        "--dinamic-font",
-        `"${fontName}", sans-serif`,
-      );
-      document.documentElement.style.setProperty("--base-color", baseColor);
-
-      if (bgImg) {
-        document.getElementById("card-front-img").style.backgroundImage =
-          `url('${bgImg}')`;
+      function loadProfile() {
+        const p = profiles[document.getElementById("profile").value];
+        document.getElementById("twitchUser").value = p.user;
+        document.getElementById("fontName").value = p.font;
+        document.getElementById("baseColor").value = p.base;
+        document.getElementById("cardBack").value = p.img;
+        for (let i = 0; i < 5; i++)
+          document.getElementById("c" + (i + 1)).value = p.colors[i];
+        generateUrl();
       }
-    </script>
 
-    <!-- Carga del motor principal -->
-    <script src="app.js"></script>
+      function generateUrl() {
+        const baseUrl =
+          window.location.href.split("index.html")[0] + "tarot.html";
+        const params = new URLSearchParams({
+          user: document.getElementById("twitchUser").value,
+          reward: document.getElementById("rewardName").value,
+          font: document.getElementById("fontName").value,
+          bg: document.getElementById("cardBack").value,
+          base: document.getElementById("baseColor").value.replace("#", ""),
+          pal: [1, 2, 3, 4, 5]
+            .map((i) => document.getElementById("c" + i).value.replace("#", ""))
+            .join("-"),
+        });
+        const url = `${baseUrl}?${params.toString()}`;
+        document.getElementById("finalUrl").value = url;
+        document.getElementById("testLink").href = url;
+      }
+
+      function copyUrl() {
+        document.getElementById("finalUrl").select();
+        document.execCommand("copy");
+      }
+
+      document
+        .querySelectorAll("input, select")
+        .forEach((el) => el.addEventListener("input", generateUrl));
+      generateUrl();
+    </script>
   </body>
 </html>
