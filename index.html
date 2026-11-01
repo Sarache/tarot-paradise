@@ -124,6 +124,12 @@
         <label>ENLACE LISTO PARA OBS (O NAVEGADOR)</label>
         <input type="text" id="finalUrl" readonly />
         <button onclick="copyUrl()">Copiar</button>
+        <button
+          onclick="abrirEditorGitHub()"
+          style="background: #ff2a9d; margin-top: 10px; width: 100%"
+        >
+          ✏️ Editar Mazo en GitHub
+        </button>
       </div>
 
       <div style="margin-top: 20px; text-align: center">
@@ -200,6 +206,14 @@
         .querySelectorAll("input, select")
         .forEach((el) => el.addEventListener("input", generateUrl));
       generateUrl();
+
+      function abrirEditorGitHub() {
+        const p = profiles[document.getElementById("profile").value];
+        window.open(
+          `https://github.com/sarache/tarot-paradise/edit/main/data/${p.csv}`,
+          "_blank",
+        );
+      }
     </script>
   </body>
 </html>
