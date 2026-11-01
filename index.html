@@ -85,7 +85,35 @@
             <option value="eskissmee">Eskissmee (Neón)</option>
           </select>
         </div>
-
+        <div
+          class="full-width checkbox-group"
+          style="
+            margin-top: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px dashed var(--border);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+          "
+        >
+          <input
+            type="checkbox"
+            id="useCommon"
+            checked
+            style="width: 20px; height: 20px; accent-color: var(--accent)"
+          />
+          <div>
+            <strong style="display: block; color: white"
+              >Mezclar con Mazo Común</strong
+            >
+            <span style="font-size: 0.8rem; color: #888"
+              >Añade las cartas de comun.csv al mazo personal de la
+              streamer.</span
+            >
+          </div>
+        </div>
         <div>
           <label>Usuario Twitch</label
           ><input type="text" id="twitchUser" value="sarachitv" />
@@ -203,6 +231,7 @@
           bg: document.getElementById("cardBack").value,
           base: document.getElementById("baseColor").value.replace("#", ""),
           deck: p.csv,
+          common: document.getElementById("useCommon").checked, // <--- EL TOGGLE
           pal: [1, 2, 3, 4, 5]
             .map((i) => document.getElementById("c" + i).value.replace("#", ""))
             .join("-"),
