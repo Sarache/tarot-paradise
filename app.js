@@ -111,12 +111,19 @@ function drawCard() {
   const hPinch = document.getElementById("hand-pinch");
   const hHold = document.getElementById("hand-hold");
 
-  cardElement.className = "tarot-card card-face card-front";
+  // 0. Resetear el estado (Limpiamos rotaciones anteriores)
+  cardElement.className = "tarot-card";
   cardElement.style.transform = "";
+
   hRelaxed.className = "mystic-hand layer-front";
+
   hPinch.className = "mystic-hand layer-front no-transition";
   hPinch.style.transform = "";
-  hHold.className = "mystic-hand layer-back";
+  hPinch.style.opacity = "1";
+
+  hHold.className = "mystic-hand layer-back no-transition";
+  hHold.style.transform = "translateY(120%) rotateY(0deg)";
+  hHold.style.opacity = "0";
 
   // 1. La mano relajada emerge muy lentamente
   setTimeout(() => {
@@ -134,7 +141,7 @@ function drawCard() {
     }, 50);
   }, 1800);
 
-  // 3. Contacto y presión
+  // 3. Contacto y presión (Aplasta la carta)
   setTimeout(() => {
     cardElement.classList.add("card-press");
     hPinch.classList.remove("hand-hover");
@@ -142,36 +149,46 @@ function drawCard() {
     hPinch.style.transition = "transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)";
   }, 3000);
 
-  // 3.5. El mini-arrastre (saca la carta hacia abajo)
+  // 3.5. El mini-arrastre (Tira de la carta hacia abajo)
   setTimeout(() => {
     cardElement.classList.remove("card-press");
     cardElement.classList.add("card-drag");
 
-    // La mano acompaña a la carta hacia abajo
     hPinch.style.transform = "scale(0.95) translateY(80px) rotate(-2deg)";
     hPinch.style.transition = "transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)";
   }, 3400);
 
-  // 4. Tirón final violento y volteo
+  // 4. EL GIRO 3D (La carta y la mano delantera empiezan a voltearse)
   setTimeout(() => {
     const indiceAleatorio = Math.floor(Math.random() * mazoActual.length);
     const cartaElegida = mazoActual.splice(indiceAleatorio, 1)[0];
     renderizarTextoBrutalista(cartaElegida);
 
-    // Quitamos la clase de arrastre para que haga el is-flipped limpio
     cardElement.classList.remove("card-drag");
-    cardElement.classList.add("is-flipped");
+    cardElement.classList.add("is-flipped"); // La carta tarda 0.8s en girar por CSS
 
-    // La mano de pinza desaparece rápido
-    hPinch.style.transform = "translateY(120%)";
-    hPinch.style.transition = "transform 0.3s ease-in";
+    // La mano de pinza gira 90 grados al mismo ritmo
+    hPinch.style.transition = "transform 0.35s ease-in";
+    hPinch.style.transform = "scale(0.95) translateY(80px) rotateY(90deg)";
+
+    // Preparamos la mano trasera "de canto" (invisible)
+    hHold.style.transition = "none";
+    hHold.style.transform = "translateY(0) rotateY(-90deg)";
+    hHold.style.opacity = "1";
   }, 3900);
 
-  // 5. Aparece la mano trasera sosteniendo el resultado
+  // 5. EL SWAP MÁGICO (Mitad del giro, 350ms después)
   setTimeout(() => {
-    hHold.classList.add("hand-show");
+    // Ocultamos la pinza (que ahora mismo está de canto e invisible)
+    hPinch.style.opacity = "0";
+
+    // La mano trasera termina de girar hacia el frente completando la ilusión
+    hHold.style.transition =
+      "transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)";
+    hHold.style.transform = "translateY(0) rotateY(0deg)";
+
     updateCounter();
-  }, 4400);
+  }, 4250);
 }
 
 // ==========================================
