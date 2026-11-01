@@ -177,7 +177,21 @@ function drawCard() {
     hHold.style.transform = "scale(1) translateY(0) rotateY(-90deg)";
     hHold.style.opacity = "1";
   }, 3900);
+
+  // 5. EL SWAP MÁGICO (Mitad del giro, 350ms después)
+  setTimeout(() => {
+    // Ocultamos la pinza (que ahora mismo está de canto e invisible)
+    hPinch.style.opacity = "0";
+
+    // La mano trasera termina de girar hacia el frente completando la ilusión
+    hHold.style.transition =
+      "transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)";
+    hHold.style.transform = "translateY(0) rotateY(0deg)";
+
+    updateCounter();
+  }, 4250);
 }
+
 // ==========================================
 // RENDERIZADO BRUTALISTA
 // ==========================================
