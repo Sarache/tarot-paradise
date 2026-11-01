@@ -111,46 +111,67 @@ function drawCard() {
   const hPinch = document.getElementById("hand-pinch");
   const hHold = document.getElementById("hand-hold");
 
-  // 0. Resetear el estado
-  cardElement.classList.remove("is-flipped");
+  cardElement.className = "tarot-card card-face card-front";
+  cardElement.style.transform = "";
   hRelaxed.className = "mystic-hand layer-front";
   hPinch.className = "mystic-hand layer-front no-transition";
+  hPinch.style.transform = "";
   hHold.className = "mystic-hand layer-back";
-  cardElement.style.opacity = "1";
 
-  // 1. Aparece la mano relajada desde abajo
+  // 1. La mano relajada emerge muy lentamente
   setTimeout(() => {
     hRelaxed.classList.add("hand-show");
   }, 100);
 
-  // 2. Cambio súbito a la mano de pinza (sin animación de subida)
+  // 2. Se transforma en pinza y sigue acechando
   setTimeout(() => {
     hRelaxed.classList.remove("hand-show");
     hPinch.classList.add("hand-show");
 
-    // Devolvemos la transición a la mano de pinza para el siguiente paso
     setTimeout(() => {
       hPinch.classList.remove("no-transition");
+      hPinch.classList.add("hand-hover");
     }, 50);
-  }, 600);
+  }, 1800);
 
-  // 3. La mano de pinza pega el tirón y la carta se voltea
+  // 3. Contacto y presión
   setTimeout(() => {
-    // Sorteamos la carta
+    cardElement.classList.add("card-press");
+    hPinch.classList.remove("hand-hover");
+    hPinch.style.transform = "scale(0.92) translateY(15px)";
+    hPinch.style.transition = "transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)";
+  }, 3000);
+
+  // 3.5. El mini-arrastre (saca la carta hacia abajo)
+  setTimeout(() => {
+    cardElement.classList.remove("card-press");
+    cardElement.classList.add("card-drag");
+
+    // La mano acompaña a la carta hacia abajo
+    hPinch.style.transform = "scale(0.95) translateY(80px) rotate(-2deg)";
+    hPinch.style.transition = "transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)";
+  }, 3400);
+
+  // 4. Tirón final violento y volteo
+  setTimeout(() => {
     const indiceAleatorio = Math.floor(Math.random() * mazoActual.length);
     const cartaElegida = mazoActual.splice(indiceAleatorio, 1)[0];
     renderizarTextoBrutalista(cartaElegida);
 
-    hPinch.classList.remove("hand-show");
-    hPinch.classList.add("hand-pull");
+    // Quitamos la clase de arrastre para que haga el is-flipped limpio
+    cardElement.classList.remove("card-drag");
     cardElement.classList.add("is-flipped");
-  }, 900);
 
-  // 4. La mano de soporte aparece por detrás cuando la carta está legible
+    // La mano de pinza desaparece rápido
+    hPinch.style.transform = "translateY(120%)";
+    hPinch.style.transition = "transform 0.3s ease-in";
+  }, 3900);
+
+  // 5. Aparece la mano trasera sosteniendo el resultado
   setTimeout(() => {
     hHold.classList.add("hand-show");
     updateCounter();
-  }, 1200);
+  }, 4400);
 }
 
 // ==========================================
