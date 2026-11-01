@@ -7,6 +7,7 @@ let mazoActual = [];
 const params = new URLSearchParams(window.location.search);
 const twitchUser = params.get("user") || "sarachitv";
 const rewardName = params.get("reward") || "Sacar carta del tarot";
+const personalCsv = params.get("deck") || "sarachi.csv"; // Pilla tu CSV por defecto
 const paletaParam = params.get("pal") || "a8e684-00e5ff-ff2a9d-ffd700-ffffff";
 const paleta = paletaParam.split("-").map((c) => "#" + c);
 
@@ -15,6 +16,10 @@ const textElement = document.getElementById("card-text");
 const shuffleVideo = document.getElementById("shuffle-animation");
 const tensionCounter = document.getElementById("tension-counter");
 
+// Carga solo el mazo común y la "valla" de la streamer seleccionada
+const csvFiles = ["data/comun.csv", `data/${personalCsv}`];
+
+// ... (Aquí sigue tu función loadTarotData() buscando row.Texto) ...
 // ==========================================
 // CARGA DE BASE DE DATOS LOCALES (GITHUB)
 // ==========================================
