@@ -26,8 +26,13 @@ const csvFiles = ["data/comun.csv", `data/${personalCsv}`];
 // ==========================================
 async function loadTarotData() {
   try {
-    const responses = await Promise.all(csvFiles.map((file) => fetch(file)));
+    // Le añadimos la hora exacta para obligar al navegador a descargar siempre la versión nueva de GitHub
+    const responses = await Promise.all(
+      csvFiles.map((file) => fetch(file + "?v=" + Date.now())),
+    );
     const texts = await Promise.all(responses.map((res) => res.text()));
+
+    // ... (el resto sigue igual)
 
     let allCards = [];
 

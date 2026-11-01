@@ -183,19 +183,27 @@
       }
 
       function generateUrl() {
-        const baseUrl =
-          window.location.href.split("index.html")[0] + "tarot.html";
+        let currentPath = window.location.href.split("?")[0];
+        if (currentPath.endsWith("index.html"))
+          currentPath = currentPath.replace("index.html", "tarot.html");
+        else if (!currentPath.endsWith("/")) currentPath += "/tarot.html";
+        else currentPath += "tarot.html";
+
+        // Asegúrate de tener estas dos líneas exactas:
+        const p = profiles[document.getElementById("profile").value];
         const params = new URLSearchParams({
           user: document.getElementById("twitchUser").value,
           reward: document.getElementById("rewardName").value,
           font: document.getElementById("fontName").value,
           bg: document.getElementById("cardBack").value,
           base: document.getElementById("baseColor").value.replace("#", ""),
+          deck: p.csv, // <--- ESTA ES LA MAGIA QUE SEPARA LOS MAZOS
           pal: [1, 2, 3, 4, 5]
             .map((i) => document.getElementById("c" + i).value.replace("#", ""))
             .join("-"),
         });
-        const url = `${baseUrl}?${params.toString()}`;
+
+        const url = `${currentPath}?${params.toString()}`;
         document.getElementById("finalUrl").value = url;
         document.getElementById("testLink").href = url;
       }
