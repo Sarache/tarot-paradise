@@ -253,11 +253,18 @@
       }
 
       function generateUrl() {
-        const baseUrl = window.location.href.replace(
-          "index.html",
-          "tarot.html",
-        );
-        const csv = encodeURIComponent(document.getElementById("csvUrl").value);
+        // Limpiamos la URL actual por si acaso
+        let currentPath = window.location.href.split("?")[0];
+
+        // Magia para crear la ruta a tarot.html sin que se rompa nada
+        if (currentPath.endsWith("index.html")) {
+          currentPath = currentPath.replace("index.html", "tarot.html");
+        } else if (!currentPath.endsWith("/")) {
+          currentPath += "/tarot.html";
+        } else {
+          currentPath += "tarot.html";
+        }
+
         const params = new URLSearchParams({
           user: document.getElementById("twitchUser").value,
           reward: document.getElementById("rewardName").value,
@@ -267,11 +274,11 @@
           pal: [1, 2, 3, 4, 5]
             .map((i) => document.getElementById("c" + i).value.replace("#", ""))
             .join("-"),
-          deck: document.getElementById("mainDeck").value,
-          mine: document.getElementById("mineClub").checked ? "true" : "false",
         });
-        document.getElementById("finalUrl").value =
-          `${baseUrl}?csv=${csv}&${params.toString()}`;
+
+        const url = `${currentPath}?${params.toString()}`;
+        document.getElementById("finalUrl").value = url;
+        document.getElementById("testLink").href = url;
       }
 
       function copyUrl() {
