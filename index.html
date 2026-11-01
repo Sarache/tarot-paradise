@@ -5,30 +5,72 @@
     <title>Back Office | Oráculo Brutalista</title>
     <style>
       :root {
-        --bg: #10081c; --surface: #1e1332; --accent: #00ff37;
-        --text: #e0f7fa; --border: #3b175d;
+        --bg: #10081c;
+        --surface: #1e1332;
+        --accent: #00ff37;
+        --text: #e0f7fa;
+        --border: #3b175d;
       }
       body {
-        background-color: var(--bg); color: var(--text);
-        font-family: monospace; padding: 40px 20px;
-        display: flex; justify-content: center;
+        background-color: var(--bg);
+        color: var(--text);
+        font-family: monospace;
+        padding: 40px 20px;
+        display: flex;
+        justify-content: center;
       }
       .panel {
-        background: var(--surface); border: 1px solid var(--border);
-        border-radius: 12px; width: 100%; max-width: 600px;
-        padding: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        width: 100%;
+        max-width: 600px;
+        padding: 30px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
       }
-      h1 { color: var(--accent); border-bottom: 1px solid var(--border); padding-bottom: 15px; }
-      .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
-      .full-width { grid-column: span 2; }
-      label { display: block; font-size: 0.85rem; color: #a8e684; margin-bottom: 5px;}
-      input, select {
-        width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--border);
-        color: white; padding: 10px; border-radius: 6px; box-sizing: border-box;
+      h1 {
+        color: var(--accent);
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 15px;
       }
-      .color-grid { display: flex; gap: 10px; }
-      input[type="color"] { width: 40px; height: 40px; padding: 0; border: none; }
-      .output-box { margin-top: 30px; bao }
+      .grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin-bottom: 20px;
+      }
+      .full-width {
+        grid-column: span 2;
+      }
+      label {
+        display: block;
+        font-size: 0.85rem;
+        color: #a8e684;
+        margin-bottom: 5px;
+      }
+      input,
+      select {
+        width: 100%;
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid var(--border);
+        color: white;
+        padding: 10px;
+        border-radius: 6px;
+        box-sizing: border-box;
+      }
+      .color-grid {
+        display: flex;
+        gap: 10px;
+      }
+      input[type="color"] {
+        width: 40px;
+        height: 40px;
+        padding: 0;
+        border: none;
+      }
+      .output-box {
+        margin-top: 30px;
+      }
     </style>
   </head>
   <body>

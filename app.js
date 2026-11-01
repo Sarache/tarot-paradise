@@ -4,11 +4,12 @@
 let mazoGlobal = [];
 let mazoActual = [];
 
-const params = new URLSearchParams(window.location.search);
-const twitchUser = params.get("user") || "sarachitv";
-const rewardName = params.get("reward") || "Sacar carta del tarot";
-const personalCsv = params.get("deck") || "sarachi.csv"; // Pilla tu CSV por defecto
-const paletaParam = params.get("pal") || "a8e684-00e5ff-ff2a9d-ffd700-ffffff";
+const urlParams = new URLSearchParams(window.location.search);
+const twitchUser = urlParams.get("user") || "sarachitv";
+const rewardName = urlParams.get("reward") || "Sacar carta del tarot";
+const personalCsv = urlParams.get("deck") || "sarachi.csv";
+const paletaParam =
+  urlParams.get("pal") || "a8e684-00e5ff-ff2a9d-ffd700-ffffff";
 const paleta = paletaParam.split("-").map((c) => "#" + c);
 
 const cardElement = document.getElementById("card");
@@ -23,13 +24,6 @@ const csvFiles = ["data/comun.csv", `data/${personalCsv}`];
 // ==========================================
 // CARGA DE BASE DE DATOS LOCALES (GITHUB)
 // ==========================================
-const csvFiles = [
-  "data/comun.csv",
-  "data/eskissmee.csv",
-  "data/klauwasaki.csv",
-  "data/sarachi.csv",
-];
-
 async function loadTarotData() {
   try {
     const responses = await Promise.all(csvFiles.map((file) => fetch(file)));
