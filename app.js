@@ -110,36 +110,38 @@ function drawCard() {
   const hRelaxed = document.getElementById("hand-relaxed");
   const hPinch = document.getElementById("hand-pinch");
   const hHold = document.getElementById("hand-hold");
-
-  // 0. Resetear el estado (Limpiamos rotaciones anteriores)
+  // 0. Resetear el estado
   cardElement.className = "tarot-card";
   cardElement.style.transform = "";
 
   hRelaxed.className = "mystic-hand layer-front";
+  hRelaxed.style.opacity = "1"; // La mano relajada empieza visible
 
-  hPinch.className = "mystic-hand layer-front no-transition";
+  hPinch.className = "mystic-hand layer-front";
   hPinch.style.transform = "";
-  hPinch.style.opacity = "1";
+  hPinch.style.opacity = "0"; // La mano de pinza viaja invisible
 
   hHold.className = "mystic-hand layer-back no-transition";
-  hHold.style.transform = "translateY(120%) rotateY(0deg)";
+  hHold.style.transform = "scale(1) translateY(120%) rotateY(0deg)";
   hHold.style.opacity = "0";
 
-  // 1. La mano relajada emerge muy lentamente
+  // 1. Ambas manos empiezan a subir a la vez
   setTimeout(() => {
     hRelaxed.classList.add("hand-show");
+    hPinch.classList.add("hand-show"); // Sube sincronizada, pero oculta
   }, 100);
 
-  // 2. Se transforma en pinza y sigue acechando
+  // 1.5. EL MORPHING (Transición suave a mitad de camino)
   setTimeout(() => {
-    hRelaxed.classList.remove("hand-show");
-    hPinch.classList.add("hand-show");
+    // Las opacidades se cruzan durante 1 segundo en pleno vuelo
+    hRelaxed.style.opacity = "0";
+    hPinch.style.opacity = "1";
+  }, 1000); // Esto ocurre a los 1000ms (mitad del trayecto)
 
-    setTimeout(() => {
-      hPinch.classList.remove("no-transition");
-      hPinch.classList.add("hand-hover");
-    }, 50);
-  }, 1800);
+  // 2. Llega arriba y hace el hover (acechando la carta)
+  setTimeout(() => {
+    hPinch.classList.add("hand-hover");
+  }, 2400); // Le damos tiempo a que termine de subir
 
   // 3. Contacto y presión (Aplasta la carta)
   setTimeout(() => {
@@ -148,15 +150,6 @@ function drawCard() {
     hPinch.style.transform = "scale(0.92) translateY(15px)";
     hPinch.style.transition = "transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1)";
   }, 3000);
-
-  // 3.5. El mini-arrastre (Tira de la carta hacia abajo)
-  setTimeout(() => {
-    cardElement.classList.remove("card-press");
-    cardElement.classList.add("card-drag");
-
-    hPinch.style.transform = "scale(0.95) translateY(80px) rotate(-2deg)";
-    hPinch.style.transition = "transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)";
-  }, 3400);
 
   // 4. EL GIRO 3D (La carta y la mano recuperan su tamaño y se voltean)
   setTimeout(() => {
