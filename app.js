@@ -29,7 +29,7 @@ if (personalCsv) {
   csvFiles.push(`data/${personalCsv}`);
 }
 
-// ... (Aquí sigue tu función loadTarotData() buscando row.Texto) ...
+// ... (Aquí sigue tu función loadTarotData() buscando row.⊹ ࣪₊ ☾ ⁺˖ ࣪ ✧ PASE VIP ✧ ࣪ ˖⁺ ˚₊⊹) ...
 // ==========================================
 // CARGA DE BASE DE DATOS LOCALES (GITHUB)
 // ==========================================
@@ -51,14 +51,19 @@ async function loadTarotData() {
         skipEmptyLines: true,
       });
 
-      // Busca obligatoriamente la columna 'Texto' en la fila 1 de los CSVs
       parsed.data.forEach((row) => {
-        if (row.Texto && row.Texto.trim() !== "") {
-          allCards.push(row.Texto.trim());
+        // Pillamos el título de la primera columna automáticamente, sea cual sea
+        const nombreColumna = Object.keys(row)[0];
+
+        if (
+          nombreColumna &&
+          row[nombreColumna] &&
+          row[nombreColumna].trim() !== ""
+        ) {
+          allCards.push(row[nombreColumna].trim());
         }
       });
     });
-
     console.log("Mazo cargado con éxito:", allCards);
     return allCards;
   } catch (error) {
@@ -76,7 +81,7 @@ loadTarotData().then((mazo) => {
     resetDeck();
   } else {
     document.getElementById("loading").innerText =
-      "Mazo vacío. Asegúrate de que los CSV tienen 'Texto' en la fila 1.";
+      "Mazo vacío. Asegúrate de que los CSV tienen '⊹ ࣪₊ ☾ ⁺˖ ࣪ ✧ PASE VIP ✧ ࣪ ˖⁺ ˚₊⊹' en la fila 1.";
   }
 });
 
