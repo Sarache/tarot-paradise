@@ -212,7 +212,11 @@
         document.getElementById("finalUrl").value = url;
         document.getElementById("testLink").href = url;
       }
-
+      const savedProfile = localStorage.getItem("oraculo_profile");
+      if (savedProfile && profiles[savedProfile]) {
+        document.getElementById("profile").value = savedProfile;
+      }
+      loadProfile(); // Esto carga los datos y genera la URL automáticamente
       function copyUrl() {
         document.getElementById("finalUrl").select();
         document.execCommand("copy");
